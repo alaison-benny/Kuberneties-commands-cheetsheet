@@ -1,0 +1,135 @@
+The Nautilus DevOps team is crafting jobs in the Kubernetes cluster. While they're developing actual scripts/commands, they're currently setting up templates and testing jobs with dummy commands. Please create a job template as per details given below:
+
+
+Create a job named countdown-devops.
+
+The spec template should be named countdown-devops (under metadata), and the container should be named container-countdown-devops
+
+Utilize image ubuntu with latest tag (ensure to specify as ubuntu:latest), and set the restart policy to Never.
+
+Execute the command sleep 5
+
+Note: The kubectl utility on jump_host is set up to operate with the Kubernetes cluster.
+-----------------------------------
+To create a job template in Kubernetes as per the given requirements, you need to create a YAML file that specifies the details of the job, including the name, container, image, command, and restart policy.
+
+### Steps to Create the Job Template:
+
+1. **Create a YAML configuration file for the Job**:
+   
+   Below is the YAML configuration (`countdown-devops-job.yaml`) for the job template as per the specified details:
+
+   ```yaml
+   apiVersion: batch/v1
+   kind: Job
+   metadata:
+     name: countdown-devops
+   spec:
+     template:
+       metadata:
+         name: countdown-devops
+       spec:
+         containers:
+         - name: container-countdown-devops
+           image: ubuntu:latest
+           command:
+             - "sleep"
+             - "5"
+         restartPolicy: Never
+   ```
+
+   ### Breakdown of the YAML:
+   - **apiVersion**: Specifies the Kubernetes API version for Jobs (`batch/v1`).
+   - **kind**: Defines the object type as a `Job`.
+   - **metadata**:
+     - **name**: The name of the job is `countdown-devops`.
+   - **spec**:
+     - **template**:
+       - **metadata**:
+         - **name**: The name of the job template is `countdown-devops`.
+       - **spec**:
+         - **containers**:
+           - **name**: The container is named `container-countdown-devops`.
+           - **image**: The image used for the container is `ubuntu:latest`.
+           - **command**: The container will execute the command `sleep 5`.
+         - **restartPolicy**: The restart policy is set to `Never`, meaning the job will not be restarted if it completes or fails.
+
+2. **Create the Job using `kubectl`**:
+
+   After preparing the YAML file (`countdown-devops-job.yaml`), use the following command to create the job:
+
+   ```bash
+   kubectl apply -f countdown-devops-job.yaml
+   ```
+
+   This will create the job in the Kubernetes cluster.
+
+3. **Verify the Job Creation**:
+
+   After applying the YAML file, you can verify that the job has been successfully created by running the following command:
+
+   ```bash
+   kubectl get jobs
+   ```
+
+   The output should look like this:
+
+   ```
+   NAME                COMPLETIONS   DURATION   AGE
+   countdown-devops    0/1           5s         1m
+   ```
+
+   This shows that the `countdown-devops` job is created, and it has not yet completed. 
+
+4. **Check the Pod Created by the Job**:
+
+   Kubernetes will create a pod to run the job. You can check the status of the pod created for the job:
+
+   ```bash
+   kubectl get pods --selector=job-name=countdown-devops
+   ```
+
+   The output will show the pod running the job:
+
+   ```
+   NAME                                         READY   STATUS      RESTARTS   AGE
+   countdown-devops-xxxxx-yyyyyy               0/1     Completed   0          1m
+   ```
+
+   The pod will run the `sleep 5` command and then complete.
+
+5. **(Optional) Describe the Job for more details**:
+
+   If you want to see more information about the job and its status, you can describe the job using:
+
+   ```bash
+   kubectl describe job countdown-devops
+   ```
+
+   This will show detailed information such as the pod template, status, and other relevant details about the job.
+
+### Summary of Commands:
+
+1. **Create the Job YAML file** (`countdown-devops-job.yaml`).
+   
+2. **Apply the YAML file to create the Job**:
+   ```bash
+   kubectl apply -f countdown-devops-job.yaml
+   ```
+
+3. **Verify the Job creation**:
+   ```bash
+   kubectl get jobs
+   ```
+
+4. **Check the Pod created by the Job**:
+   ```bash
+   kubectl get pods --selector=job-name=countdown-devops
+   ```
+
+5. **(Optional) Describe the Job for more details**:
+   ```bash
+   kubectl describe job countdown-devops
+   ```
+
+By following these steps, you will have successfully created a job named `countdown-devops` that runs the `sleep 5` command using the `ubuntu:latest` image, with the container named `container-countdown-devops` and a restart policy of `Never`.
