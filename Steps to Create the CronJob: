@@ -1,0 +1,99 @@
+write the steps to do below task "The Nautilus DevOps team is setting up recurring tasks on different schedules. Currently, they're developing scripts to be executed periodically. To kickstart the process, they're creating cron jobs in the Kubernetes cluster with placeholder commands. Follow the instructions below: 
+
+
+
+Create a cronjob named devops.
+
+
+Set Its schedule to something like */10 * * * *. You can set any schedule for now.
+
+
+Name the container cron-devops.
+
+
+Utilize the httpd image with latest tag (specify as httpd:latest).
+
+
+Execute the dummy command echo Welcome to xfusioncorp!.
+
+
+Ensure the restart policy is OnFailure.
+--------------------------------------------------------
+To create a cron job in Kubernetes with the specified details, follow these steps:
+
+Steps to Create the CronJob:
+Create a YAML configuration file for the CronJob:
+
+First, you'll need to define the CronJob in a YAML file, which describes the schedule, container, image, command, and restart policy.
+
+Here is an example YAML file (devops-cronjob.yaml) you can create:
+'''''''''''''''
+yaml
+Copy code
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: devops
+spec:
+  schedule: "*/10 * * * *"  # Cron schedule (every 10 minutes)
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cron-devops
+            image: httpd:latest
+            command:
+            - "echo"
+            - "Welcome to xfusioncorp!"
+          restartPolicy: OnFailure
+''''''''''''''''''''''''''''''''''''''
+Breakdown of the YAML:
+apiVersion: Specifies the version of the Kubernetes API (batch/v1) for CronJobs.
+kind: Specifies that this is a CronJob.
+metadata:
+name: The name of the CronJob (devops).
+spec:
+schedule: Sets the schedule for the CronJob (in this case, every 10 minutes).
+jobTemplate:
+spec:
+template:
+spec:
+containers:
+name: The container is named cron-devops.
+image: The image used for the container is httpd:latest.
+command: The command to run inside the container, in this case, echo "Welcome to xfusioncorp!".
+restartPolicy: The restart policy is set to OnFailure, meaning the job will be retried if it fails.
+Create the CronJob using kubectl:
+
+Once the YAML file (devops-cronjob.yaml) is ready, apply it using the following command:
+
+'''''''''''''''''''''''bash
+''''''''''''''''''kubectl apply -f devops-cronjob.yaml
+This will create the CronJob and schedule it to run based on the defined schedule.
+
+Verify the CronJob creation:
+
+After applying the YAML file, verify that the CronJob has been created by using the following command:
+
+bash
+'''''''''''''''''''''''kubectl get cronjobs
+The output should show the devops CronJob, similar to:
+
+javascript
+Copy code
+NAME      SCHEDULE    SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+devops    */10 * * * *  False   0        <N/A>           1m
+This confirms that the CronJob has been successfully created and is scheduled to run every 10 minutes.
+
+Check the CronJob's Pods:
+
+Once the CronJob starts running based on its schedule, you can check the Pods created by itusing the following command:
+
+bash
+'''''''''''''''''''''''''kubectl get pods --selector=job-name=devops
+This will show the pods created by the CronJob:
+
+Copy code
+NAME                       READY   STATUS      RESTARTS   AGE
+devops-xxxxxx-yyyyyy        0/1     Completed   0          1m
