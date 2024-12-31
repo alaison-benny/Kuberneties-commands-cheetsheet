@@ -1,0 +1,118 @@
+To revert to the previous version of the `nginx-deployment` (i.e., perform a rollback), follow these steps:
+
+### Steps to Perform a Rollback:
+
+1. **Check the current state of the deployment**:
+   First, confirm the current state of the `nginx-deployment` to verify the version you're rolling back from.
+
+   ```bash
+   kubectl get deployments nginx-deployment
+   ```
+
+   The output will show details about the deployment, including the number of replicas and their status:
+
+   ```
+   NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+   nginx-deployment   3/3     3            3           10m
+   ```
+
+2. **View the deployment rollout history**:
+   To see the revision history of the deployment, use the following command:
+
+   ```bash
+   kubectl rollout history deployment/nginx-deployment
+   ```
+
+   The output will show the revisions and the changes that have been made. For example:
+
+   ```
+   deployments "nginx-deployment"
+   REVISION  CHANGE-CAUSE
+   1         <initial deployment>
+   2         <image update to nginx:1.19>
+   ```
+
+   The most recent revision will be shown at the top (e.g., revision `2`), and the previous version will be the one just before it (e.g., revision `1`).
+
+3. **Initiate the rollback to the previous revision**:
+   To revert to the previous version (revision 1 in this case), run the following command:
+
+   ```bash
+   kubectl rollout undo deployment/nginx-deployment
+   ```
+
+   This command automatically rolls back to the previous revision of the deployment.
+
+4. **Monitor the rollback progress**:
+   After initiating the rollback, monitor the progress to ensure that the rollback completes successfully:
+
+   ```bash
+   kubectl rollout status deployment/nginx-deployment
+   ```
+
+   You will see feedback such as:
+
+   ```
+   deployment "nginx-deployment" successfully rolled back
+   ```
+
+   This confirms that the rollback has completed successfully.
+
+5. **Verify that the rollback was successful**:
+   After the rollback, check the status of the deployment and ensure that the correct version of the application is running:
+
+   ```bash
+   kubectl get pods
+   ```
+
+   The output should show that the pods are running, and the number of `READY` pods should match the expected number of replicas. The pods will now be using the previous version of the container image.
+
+   ```
+   NAME                                       READY   STATUS    RESTARTS   AGE
+   nginx-deployment-xxxxxx-yyyyyy             1/1     Running   0          3m
+   nginx-deployment-xxxxxx-zzzzzz             1/1     Running   0          3m
+   nginx-deployment-xxxxxx-aaaaaa             1/1     Running   0          3m
+   ```
+
+6. **(Optional) Verify the container image in the pods**:
+   If you want to verify that the rollback has correctly reverted to the previous container image, you can describe one of the pods:
+
+   ```bash
+   kubectl describe pod <pod-name>
+   ```
+
+   Look under the `Containers` section to confirm the container image being used. It should match the image used in the previous revision.
+
+### Summary of Commands:
+
+1. **Check the current state of the deployment**:
+   ```bash
+   kubectl get deployments nginx-deployment
+   ```
+
+2. **View the deployment history**:
+   ```bash
+   kubectl rollout history deployment/nginx-deployment
+   ```
+
+3. **Rollback to the previous revision**:
+   ```bash
+   kubectl rollout undo deployment/nginx-deployment
+   ```
+
+4. **Monitor the progress of the rollback**:
+   ```bash
+   kubectl rollout status deployment/nginx-deployment
+   ```
+
+5. **Verify the rollback was successful**:
+   ```bash
+   kubectl get pods
+   ```
+
+6. **(Optional) Verify the container image used in the pods**:
+   ```bash
+   kubectl describe pod <pod-name>
+   ```
+
+By following these steps, you will successfully roll back the `nginx-deployment` to the previous version, ensuring the previous release is restored and operational.
