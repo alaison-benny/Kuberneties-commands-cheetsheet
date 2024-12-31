@@ -1,0 +1,118 @@
+An application currently running on the Kubernetes cluster employs the nginx web server. The Nautilus application development team has introduced some recent changes that need deployment. They've crafted an image nginx:1.19 with the latest updates.
+
+Execute a rolling update for this application, integrating the nginx:1.19 image. The deployment is named nginx-deployment.
+
+Ensure all pods are operational post-update
+--------------------------------------
+The error message `error: unable to find container named "nginx"` suggests that the container inside the `nginx-deployment` is not named `nginx`. This is likely because the container in the deployment has a different name. To resolve this, you need to check the container's name within the `nginx-deployment` and then execute the rolling update using the correct container name.
+
+Here’s how to proceed:
+
+### Steps:
+
+1. **Inspect the deployment to find the correct container name**:
+   
+   First, examine the details of the `nginx-deployment` to get the correct container name. Use the following command to get a detailed description of the deployment:
+
+   ```bash
+   kubectl describe deployment nginx-deployment
+   ```
+
+   In the output, look for the section that lists the container(s). The relevant section will look something like this:
+
+   ```
+   Containers:
+     nginx:
+       Image:          nginx:1.18
+       Port:           80/TCP
+       Limits:
+         cpu:          500m
+         memory:       128Mi
+       Requests:
+         cpu:          250m
+         memory:       64Mi
+   ```
+
+   In this case, the container is named `nginx`. However, if your output shows a different container name, make sure to note that name.
+
+2. **Update the image with the correct container name**:
+   
+   Now that you know the correct container name (for example, if it is `nginx-container` instead of `nginx`), run the `kubectl set image` command with the correct container name. For example:
+
+   ```bash
+   kubectl set image deployment/nginx-deployment nginx-container=nginx:1.19
+   ```
+
+   Replace `nginx-container` with the actual container name you found in the previous step. This will update the container image to `nginx:1.19` for the specified container in the deployment.
+
+3. **Monitor the rolling update progress**:
+
+   Once you've initiated the rolling update, monitor its progress using:
+
+   ```bash
+   kubectl rollout status deployment/nginx-deployment
+   ```
+
+   This command will give you feedback on whether the update is progressing smoothly or if there are any issues. When successful, you should see something like:
+
+   ```
+   deployment "nginx-deployment" successfully rolled out
+   ```
+
+4. **Verify that all pods are operational**:
+
+   To verify that all the pods in the deployment are running with the updated image, use the following command:
+
+   ```bash
+   kubectl get pods
+   ```
+
+   Ensure that the `READY` count matches the number of replicas (e.g., 3/3) and that the pods are in the `Running` state. The output will look something like this:
+
+   ```
+   NAME                                       READY   STATUS    RESTARTS   AGE
+   nginx-deployment-xxxxxx-yyyyy             1/1     Running   0          3m
+   nginx-deployment-xxxxxx-zzzzz             1/1     Running   0          3m
+   nginx-deployment-xxxxxx-aaaaa             1/1     Running   0          3m
+   ```
+
+   This confirms that the update has been successfully applied, and all the pods are operational.
+
+5. **Rollback if necessary (optional)**:
+
+   If there is an issue with the update and you want to rollback to the previous version, use the following command:
+
+   ```bash
+   kubectl rollout undo deployment/nginx-deployment
+   ```
+
+   This command will revert the deployment to the previous stable version.
+
+### Summary of Commands:
+
+1. **Describe the deployment to find the correct container name**:
+   ```bash
+   kubectl describe deployment nginx-deployment
+   ```
+
+2. **Execute the rolling update with the correct container name**:
+   ```bash
+   kubectl set image deployment/nginx-deployment <container-name>=nginx:1.19
+   ```
+
+3. **Monitor the update progress**:
+   ```bash
+   kubectl rollout status deployment/nginx-deployment
+   ```
+
+4. **Verify that all pods are running**:
+   ```bash
+   kubectl get pods
+   ```
+
+5. **Rollback (if needed)**:
+   ```bash
+   kubectl rollout undo deployment/nginx-deployment
+   ```
+
+By following these steps, you'll be able to successfully perform a rolling update with the `nginx:1.19` image and ensure that all pods are operational post-update.
