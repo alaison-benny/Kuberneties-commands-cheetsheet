@@ -1,0 +1,42 @@
+Set Limits for Resources in Kubernetes
+The Nautilus DevOps team has noticed performance issues in some Kubernetes-hosted applications due to resource constraints. To address this, they plan to set limits on resource utilization. Here are the details:
+
+
+Create a pod named httpd-pod with a container named httpd-container. Use the httpd image with the latest tag (specify as httpd:latest). Set the following resource limits:
+
+Requests: Memory: 15Mi, CPU: 100m
+
+Limits: Memory: 20Mi, CPU: 100m"
+  ----------------------------------------
+  at first createa a yaml file named "limit.yaml" in the /tmp/ folder, add all the given parameters in the yaml file
+eg: 
+$ nano /tmp/limit.yaml
+-----------------
+  apiVersion: v1
+kind: Pod
+metadata:
+  name: httpd-pod
+spec:
+  containers:
+    - name: httpd-container
+      image: httpd:latest
+      resources:
+        requests:
+          memory: "15Mi"
+          cpu: "100m"
+        limits:
+          memory: "20Mi"
+          cpu: "100m"
+--------------------------------------
+To create the pod with the specified resource limits, run the following kubectl command to apply the configuration from the limit.yaml file:
+
+$ kubectl apply -f /tmp/limit.yaml
+------------------------------------------
+  Once the pod is applied, check if the pod is running properly:
+
+$ kubectl describe pod httpd-pod
+
+
+-------------------------------------
+  
+  
